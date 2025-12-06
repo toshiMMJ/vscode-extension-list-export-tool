@@ -15,27 +15,54 @@ const excludeNames = new Set(
 
 const items = fs.readdirSync(extDir).filter(item => item.includes("-"));
 
+// LICENSEファイルからライセンス種別を推測する
+function detectLicenseFromFile(extPath) {
+    const licenseFiles = ["LICENSE", "LICENSE.txt", "LICENSE.md", "license", "license.txt", "license.md"];
+    for (const name of licenseFiles) {
+        const filePath = path.join(extPath, name);
+        if (fs.existsSync(filePath)) {
+            const content = fs.readFileSync(filePath, "utf8").toUpperCase();
+            if (content.includes("MIT LICENSE") || content.includes("PERMISSION IS HEREBY GRANTED, FREE OF CHARGE")) return "MIT";
+            if (content.includes("APACHE LICENSE") && content.includes("VERSION 2.0")) return "Apache-2.0";
+            if (content.includes("BSD 3-CLAUSE") || content.includes("THREE-CLAUSE BSD")) return "BSD-3-Clause";
+            if (content.includes("BSD 2-CLAUSE") || content.includes("TWO-CLAUSE BSD")) return "BSD-2-Clause";
+            if (content.includes("GNU GENERAL PUBLIC LICENSE") && content.includes("VERSION 3")) return "GPL-3.0";
+            if (content.includes("GNU GENERAL PUBLIC LICENSE") && content.includes("VERSION 2")) return "GPL-2.0";
+            if (content.includes("GNU LESSER GENERAL PUBLIC LICENSE")) return "LGPL";
+            if (content.includes("MOZILLA PUBLIC LICENSE")) return "MPL";
+            if (content.includes("ISC LICENSE")) return "ISC";
+            if (content.includes("UNLICENSE")) return "Unlicense";
+        }
+    }
+    return "";
+}
+
 const results = items.map(dir => {
-    const packageJsonPath = path.join(extDir, dir, "package.json");
+    const extPath = path.join(extDir, dir);
+    const packageJsonPath = path.join(extPath, "package.json");
     if (!fs.existsSync(packageJsonPath)) return null;
 
     const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
 
-    // テーマを除外
-    const categories = pkg.categories || [];
-    if (categories.includes("Themes")) return null;
-
     const id = pkg.publisher + "." + pkg.name;
-    // displayNameがなければidを使用
-    const displayName = pkg.displayName || id;
+    // displayNameがないか、%で始まる（未解決のローカライズキー）場合はidを使用
+    const rawDisplayName = pkg.displayName;
+    const displayName = (rawDisplayName && !rawDisplayName.startsWith("%")) ? rawDisplayName : id;
 
     // 除外リストに記載されているdisplayNameを除外
     if (excludeNames.has(displayName)) return null;
 
+    // ライセンス取得（SEE LICENSE等の場合はLICENSEファイルから推測、判定できなければ空白）
+    let license = pkg.license || "";
+    if (!license || license.toUpperCase().includes("SEE ")) {
+        license = detectLicenseFromFile(extPath);
+    }
+
     return {
         displayName,
         id,
-        version: pkg.version
+        version: pkg.version,
+        license
     };
 }).filter(Boolean);
 
@@ -64,10 +91,10 @@ function compareVersions(a, b) {
 }
 
 // CSVヘッダー出力
-console.log('"displayName","id","version"');
+console.log('"displayName","id","version","license"');
 
 // CSVデータ出力（値をダブルクォートで囲み、内部のダブルクォートをエスケープ）
 latestOnly.forEach(r => {
     const escape = (s) => '"' + String(s).replace(/"/g, '""') + '"';
-    console.log(`${escape(r.displayName)},${escape(r.id)},${escape(r.version)}`);
+    console.log(`${escape(r.displayName)},${escape(r.id)},${escape(r.version)},${escape(r.license)}`);
 });

@@ -29,18 +29,17 @@ Outputs the following columns in CSV format:
 | displayName | Extension display name |
 | id | Extension ID (publisher.name) |
 | version | Version number |
+| license | License type |
 
 ## Example Output
 
 ```csv
-"displayName","id","version"
-"Japanese Language Pack for VS Code","ms-ceintl.vscode-language-pack-ja","1.85.0"
-"ESLint","dbaeumer.vscode-eslint","2.4.2"
+"displayName","id","version","license"
+"Japanese Language Pack for VS Code","ms-ceintl.vscode-language-pack-ja","1.85.0","MIT"
+"ESLint","dbaeumer.vscode-eslint","2.4.2","MIT"
 ```
 
 ## Features
-
-- Theme extensions are automatically excluded
 - When multiple versions of the same extension exist, only the latest version is output
 - Optionally exclude extensions by displayName using an exclude file (one name per line)
 - If displayName is not available, extension ID is used as displayName
