@@ -77,18 +77,18 @@ CSV 形式で以下の列を出力:
 | displayName | 拡張機能の表示名 |
 | id | 拡張機能ID（publisher.name） |
 | version | バージョン番号 |
+| license | ライセンス種別 |
 
 ## 出力例
 
 ```csv
-"displayName","id","version"
-"Japanese Language Pack for VS Code","ms-ceintl.vscode-language-pack-ja","1.85.0"
-"ESLint","dbaeumer.vscode-eslint","2.4.2"
+"displayName","id","version","license"
+"Japanese Language Pack for VS Code","ms-ceintl.vscode-language-pack-ja","1.85.0","MIT"
+"ESLint","dbaeumer.vscode-eslint","2.4.2","MIT"
 ```
 
 ## 機能
 
-- テーマ拡張機能は自動的に除外
 - 同じ拡張機能の複数バージョンがある場合、最新バージョンのみ出力
 - 除外ファイルを指定して、displayName で拡張機能を除外可能（1行に1つ）
 - displayName が取得できない場合は拡張機能ID を displayName として使用
