@@ -14,6 +14,12 @@ To save to a file:
 node vscode-extensions-to-csv.js > extensions.csv
 ```
 
+To exclude extensions listed in a file:
+
+```bash
+node vscode-extensions-to-csv.js exclude.txt > extensions.csv
+```
+
 ## Output Format
 
 Outputs the following columns in CSV format:
@@ -36,6 +42,8 @@ Outputs the following columns in CSV format:
 
 - Theme extensions are automatically excluded
 - When multiple versions of the same extension exist, only the latest version is output
+- Optionally exclude extensions by displayName using an exclude file (one name per line)
+- If displayName is not available, extension ID is used as displayName
 
 ---
 
@@ -53,6 +61,12 @@ node vscode-extensions-to-csv.js
 
 ```bash
 node vscode-extensions-to-csv.js > extensions.csv
+```
+
+除外リストを指定する場合:
+
+```bash
+node vscode-extensions-to-csv.js exclude.txt > extensions.csv
 ```
 
 ## 出力形式
@@ -77,3 +91,5 @@ CSV 形式で以下の列を出力:
 
 - テーマ拡張機能は自動的に除外
 - 同じ拡張機能の複数バージョンがある場合、最新バージョンのみ出力
+- 除外ファイルを指定して、displayName で拡張機能を除外可能（1行に1つ）
+- displayName が取得できない場合は拡張機能ID を displayName として使用

@@ -5,6 +5,14 @@ const os = require("os");
 // VS Code の拡張機能ディレクトリ（共通）
 const extDir = path.join(os.homedir(), ".vscode", "extensions");
 
+// 除外リストを読み込む（第一引数で指定、なければ除外なし）
+const excludeFile = process.argv[2];
+const excludeNames = new Set(
+    excludeFile && fs.existsSync(excludeFile)
+        ? fs.readFileSync(excludeFile, "utf8").split("\n").map(s => s.trim()).filter(Boolean)
+        : []
+);
+
 const items = fs.readdirSync(extDir).filter(item => item.includes("-"));
 
 const results = items.map(dir => {
@@ -17,9 +25,16 @@ const results = items.map(dir => {
     const categories = pkg.categories || [];
     if (categories.includes("Themes")) return null;
 
+    const id = pkg.publisher + "." + pkg.name;
+    // displayNameがなければidを使用
+    const displayName = pkg.displayName || id;
+
+    // 除外リストに記載されているdisplayNameを除外
+    if (excludeNames.has(displayName)) return null;
+
     return {
-        displayName: pkg.displayName || "(no displayName)",
-        id: pkg.publisher + "." + pkg.name,
+        displayName,
+        id,
         version: pkg.version
     };
 }).filter(Boolean);
